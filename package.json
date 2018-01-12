@@ -1,0 +1,14 @@
+{
+  "name": "dev-cluster-script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "true"
+  },
+  "author": "tym-oao",
+  "license": "ISC",
+  "dependencies": {
+    "googleapis": "^24.0.0"
+  }
+}
