@@ -6,7 +6,7 @@ var zone = 'us-central1-a';
 
 exports.getCluster = function(req, res) { authorize(function(authClient) {
   // Get cluster name from request body
-  var cluster_name = req.body.name  || 'dev-playground';
+  var cluster_name = req.body.name  || 'playground';
   var request = {
     projectId: project,  
     zone: zone,
@@ -27,17 +27,36 @@ exports.getCluster = function(req, res) { authorize(function(authClient) {
 
 exports.createCluster = function(req, res) { authorize(function(authClient) {
   // Get cluster name from request body
-  var cluster_name = req.body.name || 'dev-playground';
+  var cluster_name = req.body.name || 'playground';
   var request = {
     projectId: project,  
     zone: zone,
     resource: {
-      "cluster": {
-          "name": cluster_name,
-          "description": "Shared Dev cluster for trial/integration deployment.",
-          "initialNodeCount": 3
-      }
-    },
+          "cluster": {
+              "name": cluster_name,
+              "resourceLabels": {
+                "env": "development"
+              },
+              "enableKubernetesAlpha": true,
+              "description": "Shared Dev cluster for trial/integration deployment.",
+              "initialNodeCount": 3,
+              "nodeConfig": {
+                "diskSizeGb": 100,
+                "imageType": "COS",
+                "machineType": "n1-standard-1",
+                "oauthScopes": [
+                    "https://www.googleapis.com/auth/compute",
+                    "https://www.googleapis.com/auth/devstorage.read_only",
+                    "https://www.googleapis.com/auth/logging.write",
+                    "https://www.googleapis.com/auth/monitoring",
+                    "https://www.googleapis.com/auth/service.management.readonly",
+                    "https://www.googleapis.com/auth/servicecontrol",
+                    "https://www.googleapis.com/auth/trace.append"
+                ],
+                "serviceAccount": "default"
+              },
+          }
+      },
     auth: authClient,
   };
 
@@ -55,7 +74,7 @@ exports.createCluster = function(req, res) { authorize(function(authClient) {
 
 exports.deleteCluster = function(req, res) { authorize(function(authClient) {
   // Get cluster name from request body
-  var cluster_name = req.body.name  || 'dev-playground';
+  var cluster_name = req.body.name  || 'playground';
   var request = {
     projectId: project,  
     zone: zone,
@@ -71,6 +90,63 @@ exports.deleteCluster = function(req, res) { authorize(function(authClient) {
 
     res.send(JSON.stringify(response, null, 2));
   });
+});
+};
+
+
+exports.cycleCluster = function(req, res) { authorize(function(authClient) {
+  // Get cluster name from request body
+  var cluster_name = req.body.name  || 'playground';
+  var request = {
+    projectId: project,  
+    zone: zone,
+    clusterId: cluster_name,
+    auth: authClient,
+  };
+  var reponses = {};
+  container.projects.zones.clusters.delete(request, function(err, response) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    responses.push(response);
+  });
+  sleep.sleep(120);
+  request.delete(clusterId);
+  request.resource = {
+        "cluster": {
+            "name": cluster_name,
+            "resourceLabels": {
+              "env": "development"
+            },
+            "enableKubernetesAlpha": true,
+            "description": "Shared Dev cluster for trial/integration deployment.",
+            "initialNodeCount": 3,
+            "nodeConfig": {
+              "diskSizeGb": 100,
+              "imageType": "COS",
+              "machineType": "n1-standard-1",
+              "oauthScopes": [
+                  "https://www.googleapis.com/auth/compute",
+                  "https://www.googleapis.com/auth/devstorage.read_only",
+                  "https://www.googleapis.com/auth/logging.write",
+                  "https://www.googleapis.com/auth/monitoring",
+                  "https://www.googleapis.com/auth/service.management.readonly",
+                  "https://www.googleapis.com/auth/servicecontrol",
+                  "https://www.googleapis.com/auth/trace.append"
+              ],
+              "serviceAccount": "default"
+            },
+        }
+    }
+  container.projects.zones.clusters.delete(request, function(err, response) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    responses.push(response);
+  });
+  res.send(JSON.stringify(responses, null, 2))
 });
 };
 

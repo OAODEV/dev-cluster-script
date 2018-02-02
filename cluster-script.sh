@@ -1,8 +1,10 @@
 #!/bin/sh
-curl -H "Content-Type: application/json" -X POST \
--d '{"name":"dev-playground"}' \
-https://us-central1-lexical-cider-93918.cloudfunctions.net/deleteCluster >> /var/log/cluster-script.log
+curl -q -H "Content-Type: application/json" -X POST \
+-d '{"name":"playground"}' \
+https://us-central1-lexical-cider-93918.cloudfunctions.net/deleteCluster
+
 echo "$(date '+%FT%TZ') | waiting .... "
-curl -H "Content-Type: application/json" -X POST \
--d '{"name":"dev-playground"}' \
-https://us-central1-lexical-cider-93918.cloudfunctions.net/createCluster >> /var/log/cluster-script.log
+sleep 120
+curl -q -H "Content-Type: application/json" -X POST \
+-d '{"name":"playground"}' \
+https://us-central1-lexical-cider-93918.cloudfunctions.net/createCluster
